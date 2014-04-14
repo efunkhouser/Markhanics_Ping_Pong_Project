@@ -18,14 +18,14 @@ Initial = [0;0.2;(v0*cos(theta));(v0*sin(theta))]; %x0 y0 vx0 vy0
 
 options = odeset('Events',@events);
 %FB stands for First Bounce
-[T1, FB] = ode45(@proj_derivs,Times,Initial,options);
-Initial2 = [FB(end,1) FB(end,2) FB(end,3) -1*FB(end,4)];
+% [T1, FB] = ode45(@proj_derivs,Times,Initial,options);
+% Initial2 = [FB(end,1) FB(end,2) FB(end,3) -1*FB(end,4)]
 % Initial2 = [0.3739   -0.0000    1.5580    1.8161];
 %after ode stops, next call:
 [T2, SB] = ode45(@proj_derivs,Times,Initial2,options);
-plot(FB(:,1),FB(:,2))
-hold on;
-plot(SB(:,1),SB(:,2))
+% plot(FB(:,1),FB(:,2))
+% hold on;
+% plot(SB(:,1),SB(:,2))
 
 
 
