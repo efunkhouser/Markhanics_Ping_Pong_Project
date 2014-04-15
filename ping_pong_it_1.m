@@ -10,14 +10,16 @@ A = 0.00502654824; %m^2
 Cd = 0.5;
 rho = 1.225; %kg/m^3
 
-theta = 0; %launch angle in radians
-v0 = 1; %m/s
+theta = pi/4; %launch angle in radians
+v0 = 10; %m/s
 
-Times = [0:1];
-Initial = [0;0;(v0*cos(theta));(v0*sin(theta))]; %x0 y0 vx0 vy0
+Times = [0:0.01:1];
+Initial = [0;0.1;(v0*cos(theta));(v0*sin(theta))]; %x0 y0 vx0 vy0
 
 [T, PosVel] = ode45(@proj_derivs,Times,Initial);
-plot(PosVel(:,1),PosVel(:,2))
+plot(T, PosVel(:,1), 'b' ,'LineWidth', 1.5)
+hold on
+plot(T, PosVel(:,2), 'g', 'LineWidth', 1.5)
 
     function derivs = proj_derivs(t,PV)
         x = PV(1);
@@ -32,9 +34,8 @@ plot(PosVel(:,1),PosVel(:,2))
         
         Fd = 0.5 * rho * A * Cd * (norm([vx;vy]))^2 * -1 .* Vhat;
         
-        dvxdt = -1 * Fd(1) / m;
+        dvxdt = Fd(1) / m;
         dvydt = -g / m - Fd(2) / m;
-        
         
         derivs = [dxdt;dydt;dvxdt;dvydt];
     end
