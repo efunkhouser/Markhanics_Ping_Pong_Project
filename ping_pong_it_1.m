@@ -1,4 +1,5 @@
 function res = ping_pong_it_1()
+close all
 %2-D model of a ping pong ball with initial angle theta hitting the table
 %and spinning off again
 %Only spin is about z-axis
@@ -10,8 +11,8 @@ A = 0.00502654824; %m^2
 Cd = 0.5;
 rho = 1.225; %kg/m^3
 
-theta = 0; %launch angle in radians
-v0 = 2; %m/s
+theta = -pi/10; %launch angle in radians
+v0 = 10; %m/s
 
 Times = 0:.01:1;
 Initial = [0;0.2;(v0*cos(theta));(v0*sin(theta))]; %x0 y0 vx0 vy0
@@ -26,6 +27,12 @@ Initial2 = [FB(end,1) FB(end,2) FB(end,3) -1*FB(end,4)];
 plot(FB(:,1),FB(:,2))
 hold on;
 plot(SB(:,1),SB(:,2))
+X = [0, 2.74];
+Y = [0, 0];
+X2 = [1.37, 1.37];
+Y2 = [0, 0.1525];
+plot (X,Y)
+plot (X2, Y2)
 
     function [value,isterminal,direction] = events(t,PV)
         value = PV(2);
@@ -49,7 +56,7 @@ plot(SB(:,1),SB(:,2))
         dvxdt = Fd(1) / m;
         dvydt = -g + Fd(2) / m;
         derivs = [dxdt;dydt;dvxdt;dvydt];
-        percent = t*100
+        %percent = t*100
     end
 
 end
