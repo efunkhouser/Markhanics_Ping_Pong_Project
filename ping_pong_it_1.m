@@ -5,12 +5,14 @@ function res = ping_pong_it_1()
 %GOAL: working flight, impact, and post-impact flight model
 
 m = .0027; %kg
-g = 9.80; %m/s^2
+r_ball = .020; %m
 A = 0.00502654824; %m^2
 Cd = 0.5;
 rho = 1.225; %kg/m^3
+g = 9.80; %m/s^2
+mu = 0.6;
 
-theta = 0; %launch angle in radians
+theta = pi / 6; %launch angle in radians
 v0 = 2; %m/s
 
 Times = 0:.01:1;
@@ -23,11 +25,9 @@ Initial2 = [FB(end,1) FB(end,2) FB(end,3) -1*FB(end,4)];
 % Initial2 = [0.3739   -0.0000    1.5580    1.8161];
 %after ode stops, next call:
 [T2, SB] = ode45(@proj_derivs,Times,Initial2,options);
-plot(FB(:,1),FB(:,2))
+plot(FB(:,1),FB(:,2),'o')
 hold on;
-plot(SB(:,1),SB(:,2))
-
-
+plot(SB(:,1),SB(:,2),'o')
 
 
     function [value,isterminal,direction] = events(t,PV)
