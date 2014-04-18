@@ -13,11 +13,11 @@ rho = 1.225; %kg/m^3
 mu = 0.6; %coeff. of friction between ball and table
 magnus_coeff = .000207;
 
-theta = -pi/3.5; %launch angle in radians
+theta = -pi/4; %launch angle in radians
 v0 = 8; %m/s
 
-Times = 0:.01:1;
-Initial = [0;0.2;(v0*cos(theta));(v0*sin(theta));0]; %x0 y0 vx0 vy0
+Times = 0:.01:5;
+Initial = [0;0.1;(v0*cos(theta));(v0*sin(theta));0]; %x0 y0 vx0 vy0
 
 options = odeset('Events',@events);
 %B1 stands for Bounce 1
@@ -26,13 +26,13 @@ options = odeset('Events',@events);
 
 %COLLISION MODELING: FIRST BOUNCE
 % Torque * time of impact = Lf - L0
-L_0 = Initial(2) * m * Initial(3); % h * m * vx
-t_impact = 2 * -0.0014 / B1(end,4); %double compression distance (1.4 mm) / impact v
+L_0 = 0;
+t_impact = 2 * 0.0014 / norm([B1(end,3) B1(end,4)]); %double compression distance (1.4 mm) / impact v
 F_impact = -2 * m * B1(end,4) / t_impact; % 2mv / t = change in p over t
 friction = mu * F_impact * -1 * sign(B1(end,3)); % mu * N * -vxhat
 Torque = r_ball * friction; %r x F
-rxp = B1(end,1)*m*-1*B1(end,4); %r x p = range * m * vy
-Omega = (Torque * t_impact + L_0 - rxp) / ((2/3)*m*r_ball^2); %CALC R CROSS P
+Omega = (Torque * t_impact) / ((2/3)*m*(r_ball^2)) %CALC R CROSS P
+
 
 Initial2 = [B1(end,1); B1(end,2); B1(end,3); -1*B1(end,4); Omega];
 %after ode stops, next call:
@@ -45,7 +45,7 @@ plot(B2(:,1),B2(:,2))
 
 
 
-
+% res = B2(end,2);
 
     function [value,isterminal,direction] = events(t,PV)
         value = PV(2);
@@ -67,12 +67,10 @@ plot(B2(:,1),B2(:,2))
         
         Fd = -0.5 * rho * A * Cd * (norm([vx;vy]))^2 .* Vhat;
         
-        Mx = magnus_coeff * omega * vx;
-        if vy > 0
-            My = -1 * magnus_coeff * omega * vy;
-        else
-            My = magnus_coeff * omega * vy;
-        end
+        Mx = magnus_coeff * omega * vy;        
+        My = magnus_coeff * omega * vx;
+
+      
         
         dvxdt = (Fd(1) + Mx) / m;
         dvydt = -g + (Fd(2) + My) / m;
