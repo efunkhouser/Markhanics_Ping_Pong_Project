@@ -13,7 +13,7 @@ rho = 1.225; %kg/m^3
 mu = 0.6; %coeff. of friction between ball and table
 magnus_coeff = .000207;
 
-theta = -pi/8; %launch angle in radians
+theta = -pi/3.5; %launch angle in radians
 v0 = 8; %m/s
 
 Times = 0:.01:1;
@@ -37,6 +37,8 @@ Omega = (Torque * t_impact + L_0 - rxp) / ((2/3)*m*r_ball^2); %CALC R CROSS P
 Initial2 = [B1(end,1); B1(end,2); B1(end,3); -1*B1(end,4); Omega];
 %after ode stops, next call:
 [T2, B2] = ode45(@proj_derivs,Times,Initial2,options);
+
+figure;
 plot(B1(:,1),B1(:,2))
 hold on;
 plot(B2(:,1),B2(:,2))
@@ -60,18 +62,21 @@ plot(B2(:,1),B2(:,2))
         
         dxdt = vx;
         dydt = vy;
-
         
         Vhat = [vx;vy] ./ norm([vx;vy]);
         
         Fd = -0.5 * rho * A * Cd * (norm([vx;vy]))^2 .* Vhat;
         
         Mx = magnus_coeff * omega * vx;
-        My = -1 * magnus_coeff * omega * vy;
+        if vy > 0
+            My = -1 * magnus_coeff * omega * vy;
+        else
+            My = magnus_coeff * omega * vy;
+        end
         
-        dvxdt = (Fd(1)) / m;
-        dvydt = -g + (Fd(2)) / m;
-        derivs = [dxdt;dydt;dvxdt;dvydt;0];
+        dvxdt = (Fd(1) + Mx) / m;
+        dvydt = -g + (Fd(2) + My) / m;
+        derivs = [dxdt;dydt;dvxdt;dvydt;(0.03*omega/100)];
         %percent = t*100
     end
 %THE TABLE
@@ -79,7 +84,7 @@ X = [0, 2.74];
 Y = [0, 0];
 X2 = [1.37, 1.37];
 Y2 = [0, 0.1525];
-plot (X,Y)
-plot (X2, Y2)
-axis([0 3 0 1])
+plot (X,Y,'k','linewidth',2)
+plot (X2, Y2,'k','linewidth',2)
+%axis([0 6 0 1])
 end

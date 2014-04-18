@@ -34,9 +34,11 @@ Torque = r_ball * friction; %r x F
 rxp = B1(end,1)*m*-1*B1(end,4); %r x p = range * m * vy
 Omega = (Torque * t_impact + L_0 - rxp) / ((2/3)*m*r_ball^2); %CALC R CROSS P
 
-Initial2 = [B1(end,1); B1(end,2); B1(end,3); -1*B1(end,4); Omega];
+Initial2 = [B1(end,1); B1(end,2); B1(end,3); -1*B1(end,4); 100];
 %after ode stops, next call:
 [T2, B2] = ode45(@proj_derivs,Times,Initial2,options);
+
+figure;
 plot(B1(:,1),B1(:,2))
 hold on;
 plot(B2(:,1),B2(:,2))
@@ -60,7 +62,6 @@ plot(B2(:,1),B2(:,2))
         
         dxdt = vx;
         dydt = vy;
-
         
         Vhat = [vx;vy] ./ norm([vx;vy]);
         
@@ -69,8 +70,8 @@ plot(B2(:,1),B2(:,2))
         Mx = magnus_coeff * omega * vx;
         My = -1 * magnus_coeff * omega * vy;
         
-        dvxdt = (Fd(1)) / m;
-        dvydt = -g + (Fd(2)) / m;
+        dvxdt = (Fd(1) + Mx) / m;
+        dvydt = -g + (Fd(2) + My) / m;
         derivs = [dxdt;dydt;dvxdt;dvydt;0];
         %percent = t*100
     end
@@ -79,7 +80,7 @@ X = [0, 2.74];
 Y = [0, 0];
 X2 = [1.37, 1.37];
 Y2 = [0, 0.1525];
-plot (X,Y)
-plot (X2, Y2)
-axis([0 3 0 1])
+plot (X,Y,'k','linewidth',2)
+plot (X2, Y2,'k','linewidth',2)
+%axis([0 6 0 1])
 end
