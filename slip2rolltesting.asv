@@ -1,0 +1,43 @@
+%COLLISION MODELING: SLIP2ROLL
+
+%SLIP
+% if vx > rw
+%     f = mu*N
+% elseif vx == rw
+%     f = 0
+%     
+% end
+BounceInitials = B1(end,:)';
+BounceTimes = [0:10^6:t_impact];
+
+[T,Impact1] = ode45(@during_the_bounce,BounceInitials,BounceTimes];
+
+function bouncederivs = during_the_bounce(t,PV)
+    PV(1) = x;
+    PV(2) = y;
+    PV(3) = vx;
+    PV(4) = vy;
+    PV(5) = omega;
+    
+    dxdt = vx;
+    dydt = vy;
+    
+    Inertia = (2/3)*m*(r_ball^2);
+%     L_0 = (2/3)*m*(r_ball^2) * omega;
+    t_impact = 2 * 0.0014 / abs(vy); %double compression distance (1.4 mm) / impact v
+    F_impact = -2 * m * vy / t_impact; % 2mv / t = change in p over t
+    
+    if abs(vx) > abs(r_ball*omega)
+        friction = mu*F_impact;
+    elseif abs(vx) <= abs(r_ball*omega)
+        friction = 0;
+    end
+    
+    Torque = r_ball * friction; %r x F
+    
+    dvxdt = friction / m;
+    dvydt = (F_impact / m) - g;
+    domegadt = Torque / Inertia;
+    
+    bouncederivs = [dxdt;dydt;dvxdt;dvydt;domegadt];
+end

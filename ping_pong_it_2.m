@@ -41,21 +41,21 @@ Initial2 = [B1(end,1); B1(end,2); B1(end,3); -1*B1(end,4); Omega1];
 
 %COLLISION MODELING: SECOND BOUNCE
 L_0 = (2/3)*m*(r_ball^2) * B2(end,5);
-t_impact = 2 * 0.0014 / norm([B2(end,3) B2(end,4)]); %double compression distance (1.4 mm) / impact v
+t_impact = 2 * 0.0014 / norm([B2(end,3) B2(end,4)]) %double compression distance (1.4 mm) / impact v
 F_impact = -2 * m * B2(end,4) / t_impact; % 2mv / t = change in p over t
 friction = mu * F_impact * -1 * sign(B2(end,5)); % mu * N * -vxhat
 Torque = r_ball * friction; %r x F
-Omega2 = B2(end,5) + (Torque * t_impact) / ((2/3)*m*(r_ball^2))
+Omega2 = B2(end,5) + (Torque * t_impact) / ((2/3)*m*(r_ball^2));
 
 Initial3 = [B2(end,1); B2(end,2); B2(end,3); -1*B2(end,4); Omega2];
 [T3,B3] = ode45(@proj_derivs,Times,Initial3,options);
 
 figure;
-plot(T1,B1(:,5), 'LineWidth', 1.5)
-hold on;
-plot(B2(:,1),B2(:,2), 'LineWidth', 1.5)
-hold on;
-plot(B3(:,1),B3(:,2), 'LineWidth', 1.5)
+% plot(T1,B1(:,5), 'LineWidth', 1.5)
+% hold on;
+% plot(B2(:,1),B2(:,2), 'LineWidth', 1.5)
+% hold on;
+% plot(B3(:,1),B3(:,2), 'LineWidth', 1.5)
 
 
 % res = B2(end,2);
