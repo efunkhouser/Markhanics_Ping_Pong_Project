@@ -11,105 +11,21 @@ A = pi*r_ball^2; %m^2 %surface area not area
 Cd = 0.5;
 rho = 1.225; %kg/m^3
 mu = .6; %coeff. of friction between ball and table
-magnus_coeff = 0.000023;
-% magnus_coeff = 2.6237e-08;
+magnus_coeff = 0;
+%magnus_coeff = 0.0000207;
 
-% theta = -pi/5; %launch angle in radians
-% v0 = 20; %m/s
+theta = -0.1974; %launch angle in radians
+v0 = 25.4951; %m/s
 
-Times = 0:.01:7;
-Initial = [0;0.1;25;-5;0]; %x0 y0 vx0 vy0 omega
-
+F1_Times = 0:.01:7;
+%F1_Initial = [0;0.1;v0*cos(theta); v0*sin(theta);500];
+F1_Initial = [0;0.1;9; -5; 600];
 options = odeset('Events',@events);
-%B1 stands for Bounce 1
-[T1, B1] = ode45(@proj_derivs,Times,Initial,options);
 
+%F1 stands for flight 1, ball is in flight first
+[T_F1, F1] = ode45(@flight_derivs,F1_Times,F1_Initial, options);
 
-%COLLISION MODELING: FIRST BOUNCE
-t_impact = 2 * 0.0014 / abs(B1(end,4)); %double compression distance (1.4 mm) / impact v
-impact_velocity = B1(end,4);
-BounceInitials = B1(end,:)';
-BounceTimes = [0:10^-6:t_impact];
-
-[Timp,Imp1] = ode45(@during_the_bounce,BounceTimes,BounceInitials);
-
-    function bouncederivs = during_the_bounce(t,PV)
-        x = PV(1);
-        y = PV(2);
-        vx = PV(3);
-        vy = PV(4);
-        omega = PV(5);
-        
-        dxdt = vx;
-        dydt = vy;
-        
-        Inertia = (2/3)*m*(r_ball^2);
-        
-        F_impact = -2 * m * impact_velocity / t_impact; % 2mv / t = change in p over t
-        
-%         if abs(vx) > abs(r_ball*omega)
-%             friction = -1*mu*F_impact;
-%         elseif abs(vx) <= abs(r_ball*omega)
-%             friction = 0;
-%         end
-        if vx + r_ball*omega > 0
-            friction = -1*mu*F_impact;
-        elseif vx + r_ball*omega < 0
-            friction = mu*F_impact;
-        else
-            friction = 0;
-        end
-        
-        Torque = y * friction; %r x F
-        
-        dvxdt = friction / m;
-        dvydt = (F_impact / m) - g;
-        domegadt = Torque / Inertia;
-        
-        bouncederivs = [dxdt;dydt;dvxdt;dvydt;domegadt];
-    end
-
-% plot(Timp,Imp1(:,2))
-Initial2 = Imp1(end,:)';
-% %after ode stops, next call:
-[T2, B2] = ode45(@proj_derivs,Times,Initial2,options);
-% 
-% 
-% Initial3 = [B2(end,1); B2(end,2); B2(end,3); -1*B2(end,4); Omega2];
-% [T3,B3] = ode45(@proj_derivs,Times,Initial3,options);
-% 
-figure;
-plot(B1(:,1),B1(:,2), 'LineWidth', 1.5)
-hold on;
-plot(Imp1(:,1), Imp1(:,2), 'LineWidth', 1.5)
-plot(B2(:,1),B2(:,2), 'LineWidth', 1.5)
-norm(B2(1,3:4))
-B2(1,5)
-
-% hold on;
-% plot(B3(:,1),B3(:,2), 'LineWidth', 1.5)
-
-
-% MAKE THE VX and R OMEGA GRAPH
-% hold on
-% plot(T1, B1(:,3), 'b')
-% plot(T1, -1*B1(:,5)*r_ball, 'g')
-% plot(T1(end)+Timp, Imp1(:,3), 'b')
-% plot(T1(end)+Timp, -1*Imp1(:,5)*r_ball,'g')
-% plot(T1(end)+Timp(end)+T2, B2(:,3), 'b')
-% plot(T1(end)+Timp(end)+T2, -1*B2(:,5)*r_ball, 'g')
-
-
-
-% res = B2(end,2);
-
-    function [value,isterminal,direction] = events(t,PV)
-        value = PV(2)-r_ball;
-        isterminal = 1;
-        direction = -1;
-    end
-
-    function derivs = proj_derivs(t,PV)
+    function derivs = flight_derivs(t,PV)
         x = PV(1);
         y = PV(2);
         vx = PV(3);
@@ -133,6 +49,104 @@ B2(1,5)
         derivs = [dxdt;dydt;dvxdt;dvydt;(0.03*omega/100)];
         %percent = t*100
     end
+
+%COLLISION MODELING: FIRST BOUNCE
+
+t_impact = 2 * 0.0014 / abs(F1(end,4)); %double compression distance (1.4 mm) / impact v
+impact_velocity = F1(end,4);
+B1_Initial = F1(end,:)';
+B1_Times = [0:10^-6:t_impact];
+
+[T_B1, B1] = ode45(@bounce_derivs,B1_Times, B1_Initial);
+B1
+    function bouncederivs = bounce_derivs(t,PV)
+        x = PV(1);
+        y = PV(2);
+        vx = PV(3);
+        vy = PV(4);
+        omega = PV(5);
+        
+        dxdt = vx;
+        dydt = vy;
+        
+        Inertia = (2/3)*m*(r_ball^2);
+        
+        F_impact = -2 * m * impact_velocity / t_impact; % 2mv / t = change in p over t
+        
+        if vx + r_ball*omega > 0
+            friction = -1*mu*F_impact;
+            %disp('Boyz 2 Men')
+        elseif vx + r_ball*omega < 0
+            friction = mu*F_impact;
+            %disp('Boyz 2 Men')
+        else
+            friction = 0;
+            disp('Slip 2 Roll')
+        end
+        
+        Torque = y * friction; %r x F
+        
+        dvxdt = friction / m;
+        dvydt = (F_impact / m) - g;
+        domegadt = Torque / Inertia;
+        
+        bouncederivs = [dxdt;dydt;dvxdt;dvydt;domegadt];
+    end
+
+%second flight phase
+F2_Initial = B1(end,:)';
+[T_F2, F2] = ode45(@flight_derivs,F1_Times,F2_Initial,options);
+
+%second bounce phase
+t_impact = 2 * 0.0014 / abs(F2(end,4)); %double compression distance (1.4 mm) / impact v
+impact_velocity = F2(end,4);
+B2_Initial = F2(end,:)';
+B2_Times = [0:10^-6:t_impact];
+
+[T_B2, B2] = ode45(@bounce_derivs, B2_Times, B2_Initial);
+B2
+%third and final flight phase
+F3_Initial = B2(end,:)';
+[T_F3, F3] = ode45(@flight_derivs, F1_Times, F3_Initial, options);
+
+figure;
+hold on
+plot(F1(:,1),F1(:,2), 'LineWidth', 1.5)
+plot(B1(:,1), B1(:,2), 'LineWidth', 1.5)
+plot(F2(:,1),F2(:,2), 'LineWidth', 1.5)
+plot(B2(:,1), B2(:,2), 'LineWidth', 1.5)
+plot(F3(:,1),F3(:,2), 'LineWidth', 1.5)
+
+% hold on;
+% plot(B3(:,1),B3(:,2), 'LineWidth', 1.5)
+
+
+% MAKE THE VX and R OMEGA GRAPH
+% figure;
+% hold on
+% plot(T_F1, F1(:,3), 'b')
+% plot(T_F1, -1*F1(:,5)*r_ball, 'g')
+% plot(T_F1(end)+ T_B1, B1(:,3), 'b')
+% plot(T_F1(end) + T_B1, -1*B1(:,5)*r_ball, 'g')
+% plot(T_F1(end)+T_B1(end) + T_F2, F2(:,3), 'b')
+% plot(T_F1(end)+T_B1(end) + T_F2, -1*F2(:,5)*r_ball, 'g')
+% plot(T_F1(end)+T_B1(end) + T_F2(end) + T_B2, B2(:,3), 'b')
+% plot(T_F1(end)+T_B1(end) + T_F2(end) + T_B2, -1*B2(:,5)*r_ball, 'g')
+% plot(T_F1(end)+T_B1(end) + T_F2(end) + T_B2(end)+T_F3, F3(:,3), 'b')
+% plot(T_F1(end)+T_B1(end) + T_F2(end) + T_B2(end)+T_F3, -1*F3(:,5)*r_ball, 'g')
+
+
+
+
+% res = B2(end,2);
+
+    function [value,isterminal,direction] = events(t,PV)
+        value = PV(2)-r_ball;
+        isterminal = 1;
+        direction = -1;
+    end
+
+
 %THE TABLE
 X = [0, 2.74];
 Y = [0, 0];
@@ -140,5 +154,5 @@ X2 = [1.37, 1.37];
 Y2 = [0, 0.1525];
 plot (X,Y,'k','linewidth',2)
 plot (X2, Y2,'k','linewidth',2)
-% axis([0 6 0 1])
+%axis([0 6 0 1])
 end
