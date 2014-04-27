@@ -1,4 +1,20 @@
 function res = ping_pong_it_3()
+
+for i = 197:1000
+    serve(i);
+    if F2(end, 1) < 2.74
+        V(i) = F3(end,1)-B2(end,1);
+    else
+        V(i) = 0;
+    end
+end
+
+i = 197:1000;
+plot(i, V, 'b', 'LineWidth', 1.5)
+
+serve(600)
+
+function res = serve(init_omega)
 %2-D model of a ping pong ball with initial angle theta hitting the table
 %and spinning off again
 %Only spin is 2-D
@@ -19,7 +35,7 @@ v0 = 25.4951; %m/s
 
 F1_Times = 0:.01:7;
 %F1_Initial = [0;0.1;v0*cos(theta); v0*sin(theta);500];
-F1_Initial = [0;0.1;9; -5; 600];
+F1_Initial = [0;0.1;9; -5; init_omega];
 options = odeset('Events',@events);
 
 %F1 stands for flight 1, ball is in flight first
@@ -58,7 +74,7 @@ B1_Initial = F1(end,:)';
 B1_Times = [0:10^-6:t_impact];
 
 [T_B1, B1] = ode45(@bounce_derivs,B1_Times, B1_Initial);
-B1
+
     function bouncederivs = bounce_derivs(t,PV)
         x = PV(1);
         y = PV(2);
@@ -104,18 +120,17 @@ B2_Initial = F2(end,:)';
 B2_Times = [0:10^-6:t_impact];
 
 [T_B2, B2] = ode45(@bounce_derivs, B2_Times, B2_Initial);
-B2
 %third and final flight phase
 F3_Initial = B2(end,:)';
 [T_F3, F3] = ode45(@flight_derivs, F1_Times, F3_Initial, options);
 
-figure;
-hold on
-plot(F1(:,1),F1(:,2), 'LineWidth', 1.5)
-plot(B1(:,1), B1(:,2), 'LineWidth', 1.5)
-plot(F2(:,1),F2(:,2), 'LineWidth', 1.5)
-plot(B2(:,1), B2(:,2), 'LineWidth', 1.5)
-plot(F3(:,1),F3(:,2), 'LineWidth', 1.5)
+% figure;
+% hold on
+% plot(F1(:,1),F1(:,2), 'LineWidth', 1.5)
+% plot(B1(:,1), B1(:,2), 'LineWidth', 1.5)
+% plot(F2(:,1),F2(:,2), 'LineWidth', 1.5)
+% plot(B2(:,1), B2(:,2), 'LineWidth', 1.5)
+% plot(F3(:,1),F3(:,2), 'LineWidth', 1.5)
 
 % hold on;
 % plot(B3(:,1),B3(:,2), 'LineWidth', 1.5)
@@ -152,7 +167,9 @@ X = [0, 2.74];
 Y = [0, 0];
 X2 = [1.37, 1.37];
 Y2 = [0, 0.1525];
-plot (X,Y,'k','linewidth',2)
-plot (X2, Y2,'k','linewidth',2)
+% plot (X,Y,'k','linewidth',2)
+% plot (X2, Y2,'k','linewidth',2)
 %axis([0 6 0 1])
+
+end
 end
